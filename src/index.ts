@@ -20,6 +20,7 @@ export type { MongoDBAdapterConfig } from './adapters';
 export type {
   Permission,
   Role,
+  RBACTypes,
   RoleDocument,
   UserDocument,
   RBACAdapter,

@@ -1,12 +1,35 @@
 /**
- * Generic permission type - users should extend this with their own permission strings
+ * Module augmentation interface for customizing Permission and Role types
+ *
+ * Users can augment this interface to get full type safety and autocomplete.
+ *
+ * @example
+ * ```typescript
+ * // In your project: types/rbac.d.ts
+ * import '@khannara/next-rbac';
+ *
+ * declare module '@khannara/next-rbac' {
+ *   export interface RBACTypes {
+ *     Permission: 'users.create' | 'users.read' | 'users.update' | 'users.delete';
+ *     Role: 'admin' | 'manager' | 'user';
+ *   }
+ * }
+ * ```
  */
-export type Permission = string;
+export interface RBACTypes {
+  Permission: string;
+  Role: string;
+}
 
 /**
- * Generic role type - users should extend this with their own role strings
+ * Permission type - defaults to string, can be augmented via RBACTypes
  */
-export type Role = string;
+export type Permission = RBACTypes['Permission'];
+
+/**
+ * Role type - defaults to string, can be augmented via RBACTypes
+ */
+export type Role = RBACTypes['Role'];
 
 /**
  * Role document as stored in database
@@ -15,6 +38,11 @@ export interface RoleDocument {
   _id?: unknown;
   name: string;
   permissions: Permission[];
+  /**
+   * Optional: Name of parent role to inherit permissions from
+   * @example 'admin' inherits from 'manager', 'manager' inherits from 'user'
+   */
+  inherits?: string;
   created_at?: Date;
   updated_at?: Date;
   deleted_at?: Date | null;

@@ -1,0 +1,46 @@
+# Source files (we publish dist/ instead)
+src/
+tsconfig.json
+tsup.config.ts
+
+# Tests
+**/__tests__/
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+jest.config.js
+jest.setup.js
+coverage/
+
+# Development files
+.github/
+.vscode/
+node_modules/
+*.log
+
+# Documentation (included in package)
+# README.md - INCLUDED
+# LICENSE - INCLUDED
+# CHANGELOG.md - INCLUDED
+
+# Example files (not needed in package)
+src/types/augmentation.example.ts
+examples/
+
+# Build artifacts
+*.tsbuildinfo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.idea/
+*.swp
+*.swo
+*~
+
+# Git files
+.git/
+.gitignore
+.gitattributes
