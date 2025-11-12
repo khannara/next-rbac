@@ -292,6 +292,57 @@ describe('RBAC Middleware', () => {
         url: 'https://example.com/forbidden',
       });
     });
+    it('should redirect with exact forbidden URL when permissions check fails', async () => {
+      const middleware = createRBACMiddleware({
+        adapter: mockAdapter,
+        getUserId: mockGetUserId,
+        forbiddenUrl: '/no-access',
+      });
+
+      mockGetUserId.mockResolvedValue('user123');
+      (mockAdapter.getUserRole as jest.Mock).mockResolvedValue('user');
+      (mockAdapter.getRolePermissions as jest.Mock).mockResolvedValue(['users.read']);
+
+      mockRequest.nextUrl!.pathname = '/api/users';
+
+      const response = await middleware(
+        mockRequest as NextRequest,
+        {
+          '/api/users': { permissions: ['users.read', 'users.write', 'users.delete'] },
+        }
+      );
+
+      expect(response).toEqual({
+        type: 'redirect',
+        url: 'https://example.com/no-access',
+      });
+    });
+
+    it('should redirect with exact forbidden URL when anyPermissions check fails', async () => {
+      const middleware = createRBACMiddleware({
+        adapter: mockAdapter,
+        getUserId: mockGetUserId,
+        forbiddenUrl: '/insufficient-permissions',
+      });
+
+      mockGetUserId.mockResolvedValue('user123');
+      (mockAdapter.getUserRole as jest.Mock).mockResolvedValue('user');
+      (mockAdapter.getRolePermissions as jest.Mock).mockResolvedValue(['users.read']);
+
+      mockRequest.nextUrl!.pathname = '/admin/settings';
+
+      const response = await middleware(
+        mockRequest as NextRequest,
+        {
+          '/admin/settings': { anyPermissions: ['admin.full', 'settings.manage'] },
+        }
+      );
+
+      expect(response).toEqual({
+        type: 'redirect',
+        url: 'https://example.com/insufficient-permissions',
+      });
+    });
 
     it('should match most specific route first', async () => {
       const middleware = createRBACMiddleware({
@@ -375,6 +426,43 @@ describe('RBAC Middleware', () => {
         url: 'https://example.com/forbidden',
       });
     });
+    it('should handle null user role in createRoleMiddleware', async () => {
+      const middleware = createRoleMiddleware({
+        adapter: mockAdapter,
+        getUserId: mockGetUserId,
+        allowedRoles: ['admin'],
+      });
+
+      mockGetUserId.mockResolvedValue('user123');
+      (mockAdapter.getUserRole as jest.Mock).mockResolvedValue(null);
+
+      const response = await middleware(mockRequest as NextRequest);
+
+      expect(response).toEqual({
+        type: 'redirect',
+        url: 'https://example.com/forbidden',
+      });
+    });
+
+    it('should use custom forbidden URL in createRoleMiddleware', async () => {
+      const middleware = createRoleMiddleware({
+        adapter: mockAdapter,
+        getUserId: mockGetUserId,
+        allowedRoles: ['admin'],
+        forbiddenUrl: '/custom-forbidden',
+      });
+
+      mockGetUserId.mockResolvedValue('user123');
+      (mockAdapter.getUserRole as jest.Mock).mockResolvedValue('user');
+
+      const response = await middleware(mockRequest as NextRequest);
+
+      expect(response).toEqual({
+        type: 'redirect',
+        url: 'https://example.com/custom-forbidden',
+      });
+    });
+
   });
 
   describe('createPermissionMiddleware', () => {
