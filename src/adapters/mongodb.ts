@@ -71,6 +71,20 @@ export class MongoDBAdapter implements RBACAdapter {
 
   async getRolePermissions(roleName: Role): Promise<Permission[]> {
     const role = await this.findRole(roleName);
-    return role?.permissions || [];
+
+    if (!role) {
+      return [];
+    }
+
+    // Get direct permissions
+    const permissions = new Set<Permission>(role.permissions || []);
+
+    // Recursively get inherited permissions
+    if (role.inherits) {
+      const inheritedPermissions = await this.getRolePermissions(role.inherits as Role);
+      inheritedPermissions.forEach(p => permissions.add(p));
+    }
+
+    return Array.from(permissions);
   }
 }
