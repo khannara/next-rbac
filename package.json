@@ -1,6 +1,6 @@
 {
   "name": "@khannara/next-rbac",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Enterprise-ready Role-Based Access Control (RBAC) for Next.js 13+ App Router with TypeScript support. Supports MongoDB, Prisma (PostgreSQL, MySQL, SQLite, etc.), hierarchical roles, and middleware protection.",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
