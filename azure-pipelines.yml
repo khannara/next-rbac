@@ -1,0 +1,107 @@
+# Azure DevOps Pipeline for @khannara/next-rbac
+# Migrated from GitHub Actions - Unlimited build minutes for public repos!
+
+trigger:
+  branches:
+    include:
+      - main
+      - develop
+
+pr:
+  branches:
+    include:
+      - main
+      - develop
+
+# Scheduled runs (daily tests to catch dependency issues)
+schedules:
+  - cron: "0 2 * * *"  # Daily at 2 AM UTC
+    displayName: Daily unit tests
+    branches:
+      include:
+        - main
+    always: true  # Run even if no code changes
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  CI: true
+
+stages:
+  - stage: Test
+    displayName: 'Test on Multiple Node.js Versions'
+    jobs:
+      - job: QualityGates
+        displayName: 'Quality Gates'
+        # Multi-version Node.js testing strategy
+        strategy:
+          matrix:
+            Node18:
+              NODE_VERSION: '18.x'
+            Node20:
+              NODE_VERSION: '20.x'
+            Node22:
+              NODE_VERSION: '22.x'
+        steps:
+          - task: NodeTool@0
+            displayName: 'Install Node.js $(NODE_VERSION)'
+            inputs:
+              versionSpec: $(NODE_VERSION)
+
+          - script: npm ci
+            displayName: 'Install dependencies'
+
+          - script: npm run lint
+            displayName: 'ESLint'
+
+          - script: npm run test:coverage
+            displayName: 'Run tests with coverage (116 tests)'
+
+          - task: PublishTestResults@2
+            displayName: 'Publish test results'
+            condition: always()
+            inputs:
+              testResultsFormat: 'JUnit'
+              testResultsFiles: '**/jest-results.xml'
+              failTaskOnFailedTests: true
+
+          - task: PublishCodeCoverageResults@1
+            displayName: 'Publish code coverage (96%)'
+            condition: and(always(), eq(variables['NODE_VERSION'], '20.x'))
+            inputs:
+              codeCoverageTool: 'Cobertura'
+              summaryFileLocation: '$(System.DefaultWorkingDirectory)/coverage/cobertura-coverage.xml'
+
+  - stage: Build
+    displayName: 'Build Package'
+    dependsOn: Test
+    condition: succeeded()
+    jobs:
+      - job: BuildPackage
+        displayName: 'Build and Verify'
+        steps:
+          - task: NodeTool@0
+            displayName: 'Install Node.js 20.x'
+            inputs:
+              versionSpec: '20.x'
+
+          - script: npm ci
+            displayName: 'Install dependencies'
+
+          - script: npm run build
+            displayName: 'Build package'
+
+          - script: |
+              test -d dist || (echo "dist directory not created" && exit 1)
+              test -f dist/index.js || (echo "dist/index.js not created" && exit 1)
+              test -f dist/index.d.ts || (echo "dist/index.d.ts not created" && exit 1)
+              echo "Build verification passed!"
+            displayName: 'Verify build output'
+
+          - task: PublishPipelineArtifact@1
+            displayName: 'Upload build artifacts'
+            inputs:
+              targetPath: 'dist'
+              artifact: 'package-dist'
+              publishLocation: 'pipeline'

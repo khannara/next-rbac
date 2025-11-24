@@ -4,7 +4,7 @@
 
 [![npm version](https://badge.fury.io/js/%40khannara%2Fnext-rbac.svg)](https://www.npmjs.com/package/@khannara/next-rbac)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![CI](https://github.com/khannara/next-rbac/actions/workflows/ci.yml/badge.svg)](https://github.com/khannara/next-rbac/actions/workflows/ci.yml)
+[![Build Status](https://dev.azure.com/phay/next-rbac/_apis/build/status/next-rbac-ci?branchName=main)](https://dev.azure.com/phay/next-rbac/_build/latest?definitionId=3&branchName=main)
 
 Production-ready RBAC system extracted from a live Next.js application serving **1000+ users**.
 
