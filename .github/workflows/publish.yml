@@ -1,5 +1,9 @@
 name: Publish to NPM
 
+# This workflow ONLY handles NPM publishing with provenance
+# Quality gates (lint, test, build) are handled by Azure DevOps pipeline
+# See: https://dev.azure.com/phay/next-rbac
+
 on:
   release:
     types: [created]
@@ -11,14 +15,14 @@ jobs:
 
     permissions:
       contents: read
-      id-token: write
+      id-token: write  # Required for NPM provenance
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
           node-version: 20.x
           registry-url: 'https://registry.npmjs.org'
@@ -27,16 +31,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run linter
-        run: npm run lint
-
-      - name: Run tests
-        run: npm test
-
       - name: Build package
         run: npm run build
 
-      - name: Publish to NPM
+      - name: Publish to NPM with provenance
         run: npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
