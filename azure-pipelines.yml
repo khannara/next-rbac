@@ -26,7 +26,9 @@ pool:
   vmImage: 'ubuntu-latest'
 
 variables:
-  CI: true
+  - group: next-rbac-secrets
+  - name: CI
+    value: true
 
 stages:
   - stage: Test
@@ -57,6 +59,8 @@ stages:
 
           - script: npm run test:coverage
             displayName: 'Run tests with coverage (116 tests)'
+            env:
+              METRICS_API_KEY: $(METRICS_API_KEY)
 
           - task: PublishTestResults@2
             displayName: 'Publish test results'
