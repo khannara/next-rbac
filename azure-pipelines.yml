@@ -26,7 +26,9 @@ pool:
   vmImage: 'ubuntu-latest'
 
 variables:
-  CI: true
+  - group: next-rbac-secrets
+  - name: CI
+    value: true
 
 stages:
   - stage: Test
@@ -57,6 +59,8 @@ stages:
 
           - script: npm run test:coverage
             displayName: 'Run tests with coverage (116 tests)'
+            env:
+              METRICS_API_KEY: $(METRICS_API_KEY)
 
           - task: PublishTestResults@2
             displayName: 'Publish test results'
@@ -73,10 +77,48 @@ stages:
               codeCoverageTool: 'Cobertura'
               summaryFileLocation: '$(System.DefaultWorkingDirectory)/coverage/cobertura-coverage.xml'
 
+  - stage: SonarCloud
+    displayName: 'SonarCloud Analysis'
+    dependsOn: Test
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+    jobs:
+      - job: SonarCloudAnalysis
+        displayName: 'Code Quality Analysis'
+        steps:
+          - task: NodeTool@0
+            displayName: 'Install Node.js 20.x'
+            inputs:
+              versionSpec: '20.x'
+
+          - script: npm ci
+            displayName: 'Install dependencies'
+
+          - script: npx jest --coverage
+            displayName: 'Generate coverage report'
+
+          - script: |
+              npm install -g sonarqube-scanner
+              sonar-scanner \
+                -Dsonar.token=$(SONARCLOUD_TOKEN) \
+                -Dsonar.organization=$(SONARCLOUD_ORG) \
+                -Dsonar.qualitygate.wait=true
+            displayName: 'Run SonarCloud Analysis'
+            env:
+              SONARCLOUD_TOKEN: $(SONARCLOUD_TOKEN)
+
   - stage: Build
     displayName: 'Build Package'
-    dependsOn: Test
-    condition: succeeded()
+    dependsOn:
+      - Test
+      - SonarCloud
+    condition: |
+      and(
+        succeeded('Test'),
+        or(
+          succeeded('SonarCloud'),
+          eq(dependencies.SonarCloud.result, 'Skipped')
+        )
+      )
     jobs:
       - job: BuildPackage
         displayName: 'Build and Verify'

@@ -5,6 +5,8 @@
 [![npm version](https://badge.fury.io/js/%40khannara%2Fnext-rbac.svg)](https://www.npmjs.com/package/@khannara/next-rbac)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Build Status](https://dev.azure.com/phay/next-rbac/_apis/build/status/next-rbac-ci?branchName=main)](https://dev.azure.com/phay/next-rbac/_build/latest?definitionId=3&branchName=main)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=khannara_next-rbac&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=khannara_next-rbac)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=khannara_next-rbac&metric=coverage)](https://sonarcloud.io/summary/new_code?id=khannara_next-rbac)
 
 Production-ready RBAC system extracted from a live Next.js application serving **1000+ users**.
 
@@ -19,7 +21,7 @@ Production-ready RBAC system extracted from a live Next.js application serving *
 - ✅ **React Components** - `<PermissionGate>`, `<RoleGate>` for declarative access control
 - ✅ **Production Tested** - Battle-tested in production with 1000+ active users
 - ✅ **Zero Dependencies** - Only peer dependencies (Next.js, React)
-- ✅ **Full Test Coverage** - 116+ tests, 96%+ coverage
+- ✅ **Full Test Coverage** - 120+ tests, 94%+ coverage
 
 ## 📦 Installation
 
