@@ -13,7 +13,7 @@
   "dependencies": {
     "@khannara/next-rbac": "^0.2.0",
     "mongodb": "^6.0.0",
-    "next": "^14.0.0",
+    "next": "^14.2.34",
     "next-auth": "^4.24.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
