@@ -25,3 +25,6 @@ Thumbs.db
 # npm
 *.log
 npm-debug.log*
+
+# SonarCloud
+.scannerwork/
